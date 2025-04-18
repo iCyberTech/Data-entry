@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>School Financial Data Entry</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .card {
+            margin-bottom: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .form-control, .form-select {
+            border-radius: 5px;
+            padding: 10px;
+        }
+        .btn-primary {
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+        }
+        .btn-success {
+            background-color: #28a745;
+            border-color: #28a745;
+        }
+        .btn-warning {
+            background-color: #ffc107;
+            border-color: #ffc107;
+        }
+        .recent-titles-container {
+            margin-bottom: 15px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+        .recent-title {
+            display: inline-block;
+            margin-right: 8px;
+            margin-bottom: 8px;
+            padding: 5px 10px;
+            background-color: #e9ecef;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .recent-title:hover {
+            background-color: #dee2e6;
+        }
+        #connection-status {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: opacity 0.5s ease;
+        }
+        .connection-good {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .connection-bad {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .success-modal .modal-content {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .success-modal .modal-header {
+            border-bottom-color: #c3e6cb;
+        }
+        .success-modal .modal-footer {
+            border-top-color: #c3e6cb;
+        }
+        .history-container {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 20px;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 10px;
+        }
+        .history-item {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+        }
+        .history-item:last-child {
+            border-bottom: none;
+        }
+        .history-date {
+            color: #6c757d;
+            font-size: 0.85rem;
+        }
+        .history-amount {
+            font-weight: bold;
+        }
+        .positive-amount {
+            color: #28a745;
+        }
+        .negative-amount {
+            color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <h1 class="text-center mb-4">School Financial Data Entry</h1>
+        
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h3 class="mb-0">Add Financial Record</h3>
+                    </div>
+                    <div class="card-body">
+                        <ul class="nav nav-tabs mb-3" id="entryTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="class-fees-tab" data-bs-toggle="tab" data-bs-target="#class-fees" type="button">Class Fees</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="offerings-tab" data-bs-toggle="tab" data-bs-target="#offerings" type="button">Church Offerings</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="food-vendors-tab" data-bs-toggle="tab" data-bs-target="#food-vendors" type="button">Food Vendors</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="other-fees-tab" data-bs-toggle="tab" data-bs-target="#other-fees" type="button">Other Fees</button>
+                            </li>
+                        </ul>
+                        
+                        <div class="tab-content p-3 border border-top-0 rounded-bottom">
+                            <!-- Class Fees Tab -->
+                            <div class="tab-pane fade show active" id="class-fees" role="tabpanel">
+                                <div class="mb-3">
+                                    <label for="entry-class-select" class="form-label">Class</label>
+                                    <select id="entry-class-select" class="form-select">
+                                        <option value="Form1">Form 1</option>
+                                        <option value="Form2">Form 2</option>
+                                        <option value="Form3">Form 3</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="entry-fee-amount" class="form-label">Amount</label>
+                                    <input type="number" id="entry-fee-amount" class="form-control" placeholder="Enter amount">
+                                </div>
+                                <button id="add-class-fee" class="btn btn-primary">Add Class Fee</button>
+                            </div>
+                            
+                            <!-- Church Offerings Tab -->
+                            <div class="tab-pane fade" id="offerings" role="tabpanel">
+                                <div class="mb-3">
+                                    <label for="entry-offering-amount" class="form-label">Amount</label>
+                                    <input type="number" id="entry-offering-amount" class="form-control" placeholder="Enter amount">
+                                </div>
+                                <button id="add-offering" class="btn btn-success">Add Church Offering</button>
+                            </div>
+                            
+                            <!-- Food Vendors Tab -->
+                            <div class="tab-pane fade" id="food-vendors" role="tabpanel">
+                                <div class="mb-3">
+                                    <label for="entry-vendor-name" class="form-label">Vendor Name</label>
+                                    <input type="text" id="entry-vendor-name" class="form-control" placeholder="Enter vendor name">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="entry-food-amount" class="form-label">Amount</label>
+                                    <input type="number" id="entry-food-amount" class="form-control" placeholder="Enter amount">
+                                </div>
+                                <button id="add-food-vendor" class="btn btn-warning">Add Food Vendor Due</button>
+                            </div>
+                            
+                            <!-- Other Fees Tab -->
+                            <div class="tab-pane fade" id="other-fees" role="tabpanel">
+                                <div class="recent-titles-container" id="recent-titles">
+                                    <!-- Recent titles will be loaded here -->
+                                </div>
+                                <div class="mb-3">
+                                    <label for="entry-other-class-select" class="form-label">Class (Optional)</label>
+                                    <select id="entry-other-class-select" class="form-select">
+                                        <option value="">Select Class (Optional)</option>
+                                        <option value="Form1">Form 1</option>
+                                        <option value="Form2">Form 2</option>
+                                        <option value="Form3">Form 3</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="entry-other-title" class="form-label">Fee Title</label>
+                                    <input type="text" id="entry-other-title" class="form-control" placeholder="Enter fee title">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="entry-other-amount" class="form-label">Amount</label>
+                                    <input type="number" id="entry-other-amount" class="form-control" placeholder="Enter amount">
+                                </div>
+                                <button id="add-other-fee" class="btn btn-primary">Add Other Fee</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- History Section -->
+                <div class="card mt-4">
+                    <div class="card-header bg-info text-white">
+                        <h3 class="mb-0">Recent Entries</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="history-container" id="history-container">
+                            <!-- History items will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div class="modal fade success-modal" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="successModalLabel">Success</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Record added successfully!
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" data-bs-dismiss="modal">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Connection Status Indicator -->
+    <div id="connection-status" class="connection-bad">Disconnected from Database</div>
+
+    <!-- Firebase and Bootstrap scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+
+    <script>
+        // Debugging flag
+        const DEBUG_MODE = true;
+        
+        function logDebug(message, data = null) {
+            if (DEBUG_MODE) {
+                console.log("[DEBUG] " + message, data || "");
+            }
+        }
+
+        // Update connection status indicator
+        function updateConnectionStatus(connected) {
+            const statusElement = document.getElementById('connection-status');
+            if (connected) {
+                statusElement.textContent = "Connected to Database";
+                statusElement.className = "connection-good";
+                logDebug("Database connection established");
+                
+                // Hide the connection status after 5 seconds
+                setTimeout(() => {
+                    statusElement.style.opacity = '0';
+                    setTimeout(() => {
+                        statusElement.style.display = 'none';
+                    }, 500);
+                }, 5000);
+            } else {
+                statusElement.textContent = "Disconnected from Database";
+                statusElement.className = "connection-bad";
+                statusElement.style.display = 'block';
+                statusElement.style.opacity = '1';
+                logDebug("Database connection lost");
+            }
+        }
+
+        // Your web app's Firebase configuration (must match the main app)
+        const firebaseConfig = {
+            apiKey: "AIzaSyAtELW6wBsFVMYBOyNd8UgO5YxSjMk0VCI",
+            authDomain: "fees-tracker-hwe.firebaseapp.com",
+            databaseURL: "https://fees-tracker-hwe-default-rtdb.firebaseio.com",
+            projectId: "fees-tracker-hwe",
+            storageBucket: "fees-tracker-hwe.appspot.com",
+            messagingSenderId: "743578133528",
+            appId: "1:743578133528:web:fc800970e075c4b4be0f6d",
+            measurementId: "G-K0PYH1G62H"
+        };
+
+        // Initialize Firebase
+        logDebug("Initializing Firebase...");
+        const app = firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // Monitor connection state
+        const connectedRef = database.ref(".info/connected");
+        connectedRef.on("value", (snap) => {
+            updateConnectionStatus(snap.val() === true);
+        });
+
+        // DOM Elements
+        const addClassFeeBtn = document.getElementById('add-class-fee');
+        const addOfferingBtn = document.getElementById('add-offering');
+        const addFoodVendorBtn = document.getElementById('add-food-vendor');
+        const addOtherFeeBtn = document.getElementById('add-other-fee');
+        const recentTitlesContainer = document.getElementById('recent-titles');
+        const otherTitleInput = document.getElementById('entry-other-title');
+        const successModal = new bootstrap.Modal(document.getElementById('successModal'));
+        const historyContainer = document.getElementById('history-container');
+
+        // Recent titles from localStorage
+        let recentTitles = JSON.parse(localStorage.getItem('recentTitles')) || [];
+        // Local history of added fees
+        let localHistory = JSON.parse(localStorage.getItem('localHistory')) || [];
+
+        // Function to show success message
+        function showSuccessMessage() {
+            successModal.show();
+            setTimeout(() => {
+                successModal.hide();
+            }, 3000);
+        }
+
+        // Function to update recent titles display
+        function updateRecentTitlesDisplay() {
+            recentTitlesContainer.innerHTML = '';
+            
+            if (recentTitles.length > 0) {
+                const titleElement = document.createElement('div');
+                titleElement.className = 'mb-2';
+                titleElement.textContent = 'Recent Titles:';
+                recentTitlesContainer.appendChild(titleElement);
+                
+                recentTitles.forEach((title, index) => {
+                    const titleTag = document.createElement('span');
+                    titleTag.className = 'recent-title';
+                    titleTag.textContent = title;
+                    
+                    // Add click handler to populate the title field
+                    titleTag.addEventListener('click', () => {
+                        otherTitleInput.value = title;
+                        otherTitleInput.focus();
+                    });
+                    
+                    recentTitlesContainer.appendChild(titleTag);
+                });
+            }
+        }
+
+        // Function to update history display
+        function updateHistoryDisplay() {
+            historyContainer.innerHTML = '';
+            
+            if (localHistory.length === 0) {
+                historyContainer.innerHTML = '<div class="text-muted">No entries yet</div>';
+                return;
+            }
+            
+            // Show only the last 20 entries (most recent first)
+            const recentEntries = [...localHistory].reverse().slice(0, 20);
+            
+            recentEntries.forEach(entry => {
+                const historyItem = document.createElement('div');
+                historyItem.className = 'history-item';
+                
+                historyItem.innerHTML = `
+                    <div>
+                        <div class="history-date">${formatDate(entry.date)}</div>
+                        <div>${getEntryDescription(entry)}</div>
+                    </div>
+                    <div class="history-amount ${entry.type === 'withdrawal' ? 'negative-amount' : 'positive-amount'}">
+                        ${entry.type === 'withdrawal' ? '-' : '+'}${formatCurrency(entry.amount)}
+                    </div>
+                `;
+                
+                historyContainer.appendChild(historyItem);
+            });
+        }
+
+        // Function to format date
+        function formatDate(timestamp) {
+            const date = new Date(timestamp);
+            return date.toLocaleString();
+        }
+
+        // Function to format currency
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('en-GH', { style: 'currency', currency: 'GHS' }).format(amount);
+        }
+
+        // Function to get description for history entry
+        function getEntryDescription(entry) {
+            switch (entry.type) {
+                case 'classFee':
+                    return `Class Fee (${entry.className})`;
+                case 'offering':
+                    return 'Church Offering';
+                case 'foodVendor':
+                    return `Food Vendor (${entry.vendorName})`;
+                case 'otherFee':
+                    return `Other Fee: ${entry.title}${entry.className ? ` (${entry.className})` : ''}`;
+                default:
+                    return 'Financial Entry';
+            }
+        }
+
+        // Function to add a title to recent titles
+        function addRecentTitle(title) {
+            // Remove if already exists to avoid duplicates
+            recentTitles = recentTitles.filter(t => t !== title);
+            
+            // Add to beginning of array
+            recentTitles.unshift(title);
+            
+            // Keep only the last 10 titles
+            if (recentTitles.length > 10) {
+                recentTitles = recentTitles.slice(0, 10);
+            }
+            
+            // Save to localStorage
+            localStorage.setItem('recentTitles', JSON.stringify(recentTitles));
+            
+            // Update display
+            updateRecentTitlesDisplay();
+        }
+
+        // Function to add entry to local history
+        function addToHistory(entry) {
+            localHistory.push(entry);
+            
+            // Keep history to a reasonable size
+            if (localHistory.length > 100) {
+                localHistory = localHistory.slice(-100);
+            }
+            
+            // Save to localStorage
+            localStorage.setItem('localHistory', JSON.stringify(localHistory));
+            
+            // Update display
+            updateHistoryDisplay();
+        }
+
+        // Add Class Fee
+        addClassFeeBtn.addEventListener('click', () => {
+            const classSelect = document.getElementById('entry-class-select');
+            const feeAmount = document.getElementById('entry-fee-amount');
+            
+            if (!feeAmount.value || isNaN(feeAmount.value) || parseFloat(feeAmount.value) <= 0) {
+                alert('Please enter a valid amount');
+                return;
+            }
+            
+            const amount = parseFloat(feeAmount.value);
+            const newFee = {
+                className: classSelect.value,
+                amount: amount,
+                date: Date.now(),
+                deleted: false
+            };
+            
+            logDebug("Adding new class fee:", newFee);
+            
+            database.ref('classFees').push(newFee)
+                .then(() => {
+                    logDebug("Class fee added successfully");
+                    
+                    // Add to local history
+                    addToHistory({
+                        type: 'classFee',
+                        className: classSelect.value,
+                        amount: amount,
+                        date: Date.now()
+                    });
+                    
+                    feeAmount.value = '';
+                    showSuccessMessage();
+                })
+                .catch((error) => {
+                    logDebug('Error adding class fee:', error);
+                    alert('Error adding class fee. Please check console for details.');
+                });
+        });
+
+        // Add Church Offering
+        addOfferingBtn.addEventListener('click', () => {
+            const offeringAmount = document.getElementById('entry-offering-amount');
+            
+            if (!offeringAmount.value || isNaN(offeringAmount.value) || parseFloat(offeringAmount.value) <= 0) {
+                alert('Please enter a valid amount');
+                return;
+            }
+            
+            const amount = parseFloat(offeringAmount.value);
+            const newOffering = {
+                amount: amount,
+                date: Date.now(),
+                deleted: false
+            };
+            
+            logDebug("Adding new offering:", newOffering);
+            
+            database.ref('offerings').push(newOffering)
+                .then(() => {
+                    logDebug("Offering added successfully");
+                    
+                    // Add to local history
+                    addToHistory({
+                        type: 'offering',
+                        amount: amount,
+                        date: Date.now()
+                    });
+                    
+                    offeringAmount.value = '';
+                    showSuccessMessage();
+                })
+                .catch((error) => {
+                    logDebug('Error adding offering:', error);
+                    alert('Error adding offering. Please check console for details.');
+                });
+        });
+
+        // Add Food Vendor Due
+        addFoodVendorBtn.addEventListener('click', () => {
+            const vendorName = document.getElementById('entry-vendor-name');
+            const foodAmount = document.getElementById('entry-food-amount');
+            
+            if (!vendorName.value.trim()) {
+                alert('Please enter vendor name');
+                return;
+            }
+            
+            if (!foodAmount.value || isNaN(foodAmount.value) || parseFloat(foodAmount.value) <= 0) {
+                alert('Please enter a valid amount');
+                return;
+            }
+            
+            const amount = parseFloat(foodAmount.value);
+            const vendor = vendorName.value.trim();
+            const newFood = {
+                vendorName: vendor,
+                amount: amount,
+                date: Date.now(),
+                deleted: false
+            };
+            
+            logDebug("Adding new food vendor due:", newFood);
+            
+            database.ref('foodVendors').push(newFood)
+                .then(() => {
+                    logDebug("Food vendor due added successfully");
+                    
+                    // Add to local history
+                    addToHistory({
+                        type: 'foodVendor',
+                        vendorName: vendor,
+                        amount: amount,
+                        date: Date.now()
+                    });
+                    
+                    vendorName.value = '';
+                    foodAmount.value = '';
+                    showSuccessMessage();
+                })
+                .catch((error) => {
+                    logDebug('Error adding food vendor due:', error);
+                    alert('Error adding food vendor due. Please check console for details.');
+                });
+        });
+
+        // Add Other Fee
+        addOtherFeeBtn.addEventListener('click', () => {
+            const otherTitle = document.getElementById('entry-other-title');
+            const otherAmount = document.getElementById('entry-other-amount');
+            const otherClassSelect = document.getElementById('entry-other-class-select');
+            
+            if (!otherTitle.value.trim()) {
+                alert('Please enter fee title');
+                return;
+            }
+            
+            if (!otherAmount.value || isNaN(otherAmount.value) || parseFloat(otherAmount.value) <= 0) {
+                alert('Please enter a valid amount');
+                return;
+            }
+            
+            const title = otherTitle.value.trim();
+            const amount = parseFloat(otherAmount.value);
+            const className = otherClassSelect.value;
+            
+            const newOther = {
+                title: title,
+                amount: amount,
+                date: Date.now(),
+                deleted: false
+            };
+            
+            // Add class if selected
+            if (className) {
+                newOther.className = className;
+            }
+            
+            logDebug("Adding new other fee:", newOther);
+            
+            database.ref('otherFees').push(newOther)
+                .then(() => {
+                    logDebug("Other fee added successfully");
+                    
+                    // Add title to recent titles
+                    addRecentTitle(title);
+                    
+                    // Add to local history
+                    addToHistory({
+                        type: 'otherFee',
+                        title: title,
+                        className: className,
+                        amount: amount,
+                        date: Date.now()
+                    });
+                    
+                    otherTitle.value = '';
+                    otherAmount.value = '';
+                    otherClassSelect.value = '';
+                    showSuccessMessage();
+                })
+                .catch((error) => {
+                    logDebug('Error adding other fee:', error);
+                    alert('Error adding other fee. Please check console for details.');
+                });
+        });
+
+        // Initialize the application
+        function initApp() {
+            logDebug("Initializing data entry application...");
+            updateRecentTitlesDisplay();
+            updateHistoryDisplay();
+            
+            logDebug("Data entry application initialized successfully");
+        }
+
+        // Start the app when DOM is loaded
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
