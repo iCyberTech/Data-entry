@@ -3,82 +3,65 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>School Financial Data Entry</title>
+    <title>Teacher Portal - School Financial Tracker</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
             background-color: #f8f9fa;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
+        .role-selection {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 100px;
+        }
+        .role-btn {
+            width: 200px;
+            height: 200px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .role-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        .teacher-btn {
+            background-color: #4e73df;
+            color: white;
+        }
+        .admin-btn {
+            background-color: #1cc88a;
+            color: white;
+        }
+        .form-container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 30px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .hidden {
+            display: none;
+        }
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+        }
         .card {
             margin-bottom: 20px;
             border-radius: 10px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
-        .form-control, .form-select {
-            border-radius: 5px;
-            padding: 10px;
-        }
-        .btn-primary {
-            background-color: #0d6efd;
-            border-color: #0d6efd;
-        }
-        .btn-success {
-            background-color: #28a745;
-            border-color: #28a745;
-        }
-        .btn-warning {
-            background-color: #ffc107;
-            border-color: #ffc107;
-        }
-        .recent-titles-container {
-            margin-bottom: 15px;
-            padding: 10px;
-            background-color: #f8f9fa;
-            border-radius: 5px;
-        }
-        .recent-title {
-            display: inline-block;
-            margin-right: 8px;
-            margin-bottom: 8px;
-            padding: 5px 10px;
-            background-color: #e9ecef;
-            border-radius: 15px;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-        .recent-title:hover {
-            background-color: #dee2e6;
-        }
-        #connection-status {
-            position: fixed;
-            bottom: 10px;
-            right: 10px;
-            padding: 10px;
-            border-radius: 5px;
-            font-weight: bold;
-            transition: opacity 0.5s ease;
-        }
-        .connection-good {
-            background-color: #d4edda;
-            color: #155724;
-        }
-        .connection-bad {
-            background-color: #f8d7da;
-            color: #721c24;
-        }
-        .success-modal .modal-content {
-            background-color: #d4edda;
-            color: #155724;
-        }
-        .success-modal .modal-header {
-            border-bottom-color: #c3e6cb;
-        }
-        .success-modal .modal-footer {
-            border-top-color: #c3e6cb;
-        }
         .history-container {
-            max-height: 300px;
+            max-height: 400px;
             overflow-y: auto;
             margin-top: 20px;
             border: 1px solid #dee2e6;
@@ -107,110 +90,149 @@
         .negative-amount {
             color: #dc3545;
         }
+        .printing-fee-item {
+            background-color: #e6f7ff;
+            border-left: 4px solid #1890ff;
+        }
+        .class-fee-item {
+            background-color: #f8f9fa;
+            border-left: 4px solid #6c757d;
+        }
+        .logout-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+        }
     </style>
 </head>
 <body>
-    <div class="container mt-4">
-        <h1 class="text-center mb-4">School Financial Data Entry</h1>
+    <!-- Role Selection Screen -->
+    <div id="role-selection" class="role-selection">
+        <button id="teacher-btn" class="role-btn teacher-btn">Teacher</button>
+        <button id="admin-btn" class="role-btn admin-btn">Admin</button>
+    </div>
+
+    <!-- Teacher Password Screen -->
+    <div id="teacher-password-screen" class="form-container hidden">
+        <h2 class="text-center mb-4">Teacher Authentication</h2>
+        <div class="mb-3">
+            <label for="teacher-password" class="form-label">Enter Teacher Password</label>
+            <input type="password" class="form-control" id="teacher-password" placeholder="Password">
+        </div>
+        <button id="teacher-login-btn" class="btn btn-primary w-100">Continue</button>
+    </div>
+
+    <!-- Teacher Sign Up Screen -->
+    <div id="teacher-signup-screen" class="form-container hidden">
+        <h2 class="text-center mb-4">Teacher Registration</h2>
+        <div class="mb-3">
+            <label for="teacher-name" class="form-label">Your Name</label>
+            <input type="text" class="form-control" id="teacher-name" placeholder="Enter your name">
+        </div>
+        <div class="mb-3">
+            <label for="teacher-class" class="form-label">Select Class</label>
+            <select class="form-select" id="teacher-class">
+                <option value="Form1">Form 1</option>
+                <option value="Form2">Form 2</option>
+                <option value="Form3">Form 3</option>
+            </select>
+        </div>
+        <button id="teacher-signup-btn" class="btn btn-primary w-100">Register</button>
+    </div>
+
+    <!-- Teacher Dashboard -->
+    <div id="teacher-dashboard" class="dashboard-container hidden">
+        <button id="logout-btn" class="btn btn-danger logout-btn">Logout</button>
+        <h2 class="text-center mb-4" id="dashboard-title">Teacher Dashboard</h2>
         
-        <div class="row justify-content-center">
-            <div class="col-md-8">
+        <div class="row">
+            <div class="col-md-6">
                 <div class="card">
                     <div class="card-header bg-primary text-white">
-                        <h3 class="mb-0">Add Financial Record</h3>
+                        <h5 class="mb-0">Add Class Fee</h5>
                     </div>
                     <div class="card-body">
-                        <ul class="nav nav-tabs mb-3" id="entryTabs" role="tablist">
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link active" id="class-fees-tab" data-bs-toggle="tab" data-bs-target="#class-fees" type="button">Class Fees</button>
-                            </li>
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="offerings-tab" data-bs-toggle="tab" data-bs-target="#offerings" type="button">Church Offerings</button>
-                            </li>
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="food-vendors-tab" data-bs-toggle="tab" data-bs-target="#food-vendors" type="button">Food Vendors</button>
-                            </li>
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="other-fees-tab" data-bs-toggle="tab" data-bs-target="#other-fees" type="button">Other Fees</button>
-                            </li>
-                        </ul>
-                        
-                        <div class="tab-content p-3 border border-top-0 rounded-bottom">
-                            <!-- Class Fees Tab -->
-                            <div class="tab-pane fade show active" id="class-fees" role="tabpanel">
-                                <div class="mb-3">
-                                    <label for="entry-class-select" class="form-label">Class</label>
-                                    <select id="entry-class-select" class="form-select">
-                                        <option value="Form1">Form 1</option>
-                                        <option value="Form2">Form 2</option>
-                                        <option value="Form3">Form 3</option>
-                                    </select>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="entry-fee-amount" class="form-label">Amount</label>
-                                    <input type="number" id="entry-fee-amount" class="form-control" placeholder="Enter amount">
-                                </div>
-                                <button id="add-class-fee" class="btn btn-primary">Add Class Fee</button>
-                            </div>
-                            
-                            <!-- Church Offerings Tab -->
-                            <div class="tab-pane fade" id="offerings" role="tabpanel">
-                                <div class="mb-3">
-                                    <label for="entry-offering-amount" class="form-label">Amount</label>
-                                    <input type="number" id="entry-offering-amount" class="form-control" placeholder="Enter amount">
-                                </div>
-                                <button id="add-offering" class="btn btn-success">Add Church Offering</button>
-                            </div>
-                            
-                            <!-- Food Vendors Tab -->
-                            <div class="tab-pane fade" id="food-vendors" role="tabpanel">
-                                <div class="mb-3">
-                                    <label for="entry-vendor-name" class="form-label">Vendor Name</label>
-                                    <input type="text" id="entry-vendor-name" class="form-control" placeholder="Enter vendor name">
-                                </div>
-                                <div class="mb-3">
-                                    <label for="entry-food-amount" class="form-label">Amount</label>
-                                    <input type="number" id="entry-food-amount" class="form-control" placeholder="Enter amount">
-                                </div>
-                                <button id="add-food-vendor" class="btn btn-warning">Add Food Vendor Due</button>
-                            </div>
-                            
-                            <!-- Other Fees Tab -->
-                            <div class="tab-pane fade" id="other-fees" role="tabpanel">
-                                <div class="recent-titles-container" id="recent-titles">
-                                    <!-- Recent titles will be loaded here -->
-                                </div>
-                                <div class="mb-3">
-                                    <label for="entry-other-class-select" class="form-label">Class (Optional)</label>
-                                    <select id="entry-other-class-select" class="form-select">
-                                        <option value="">Select Class (Optional)</option>
-                                        <option value="Form1">Form 1</option>
-                                        <option value="Form2">Form 2</option>
-                                        <option value="Form3">Form 3</option>
-                                    </select>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="entry-other-title" class="form-label">Fee Title</label>
-                                    <input type="text" id="entry-other-title" class="form-control" placeholder="Enter fee title">
-                                </div>
-                                <div class="mb-3">
-                                    <label for="entry-other-amount" class="form-label">Amount</label>
-                                    <input type="number" id="entry-other-amount" class="form-control" placeholder="Enter amount">
-                                </div>
-                                <button id="add-other-fee" class="btn btn-primary">Add Other Fee</button>
-                            </div>
+                        <div class="mb-3">
+                            <label for="class-fee-amount" class="form-label">Amount</label>
+                            <input type="number" class="form-control" id="class-fee-amount" placeholder="Amount">
                         </div>
+                        <button id="add-class-fee-btn" class="btn btn-primary w-100">Add Fee</button>
                     </div>
                 </div>
-
-                <!-- History Section -->
-                <div class="card mt-4">
+            </div>
+            <div class="col-md-6">
+                <div class="card">
                     <div class="card-header bg-info text-white">
-                        <h3 class="mb-0">Recent Entries</h3>
+                        <h5 class="mb-0">Add Printing Fee</h5>
                     </div>
                     <div class="card-body">
-                        <div class="history-container" id="history-container">
-                            <!-- History items will be loaded here -->
+                        <div class="mb-3">
+                            <label for="printing-fee-amount" class="form-label">Amount</label>
+                            <input type="number" class="form-control" id="printing-fee-amount" placeholder="Amount">
+                        </div>
+                        <button id="add-printing-fee-btn" class="btn btn-info w-100">Add Printing Fee</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">Class Fees History</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="history-container" id="class-fees-history">
+                            <!-- Class fees history will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-warning text-white">
+                        <h5 class="mb-0">Printing Fees History</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="history-container" id="printing-fees-history">
+                            <!-- Printing fees history will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header bg-danger text-white">
+                        <h5 class="mb-0">Make Withdrawal</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="withdrawal-amount" class="form-label">Amount</label>
+                            <input type="number" class="form-control" id="withdrawal-amount" placeholder="Amount">
+                        </div>
+                        <div class="mb-3">
+                            <label for="withdrawal-reason" class="form-label">Reason</label>
+                            <textarea class="form-control" id="withdrawal-reason" rows="3" placeholder="Enter reason for withdrawal"></textarea>
+                        </div>
+                        <button id="make-withdrawal-btn" class="btn btn-danger w-100">Make Withdrawal</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header bg-secondary text-white">
+                        <h5 class="mb-0">Withdrawal History</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="history-container" id="withdrawal-history">
+                            <!-- Withdrawal history will be loaded here -->
                         </div>
                     </div>
                 </div>
@@ -218,28 +240,7 @@
         </div>
     </div>
 
-    <!-- Success Modal -->
-    <div class="modal fade success-modal" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="successModalLabel">Success</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    Record added successfully!
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-success" data-bs-dismiss="modal">OK</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Connection Status Indicator -->
-    <div id="connection-status" class="connection-bad">Disconnected from Database</div>
-
-    <!-- Firebase and Bootstrap scripts -->
+    <!-- Firebase and other scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     
@@ -257,31 +258,7 @@
             }
         }
 
-        // Update connection status indicator
-        function updateConnectionStatus(connected) {
-            const statusElement = document.getElementById('connection-status');
-            if (connected) {
-                statusElement.textContent = "Connected to Database";
-                statusElement.className = "connection-good";
-                logDebug("Database connection established");
-                
-                // Hide the connection status after 5 seconds
-                setTimeout(() => {
-                    statusElement.style.opacity = '0';
-                    setTimeout(() => {
-                        statusElement.style.display = 'none';
-                    }, 500);
-                }, 5000);
-            } else {
-                statusElement.textContent = "Disconnected from Database";
-                statusElement.className = "connection-bad";
-                statusElement.style.display = 'block';
-                statusElement.style.opacity = '1';
-                logDebug("Database connection lost");
-            }
-        }
-
-        // Your web app's Firebase configuration (must match the main app)
+        // Your web app's Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyAtELW6wBsFVMYBOyNd8UgO5YxSjMk0VCI",
             authDomain: "fees-tracker-hwe.firebaseapp.com",
@@ -298,95 +275,48 @@
         const app = firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        // Monitor connection state
-        const connectedRef = database.ref(".info/connected");
-        connectedRef.on("value", (snap) => {
-            updateConnectionStatus(snap.val() === true);
-        });
-
         // DOM Elements
-        const addClassFeeBtn = document.getElementById('add-class-fee');
-        const addOfferingBtn = document.getElementById('add-offering');
-        const addFoodVendorBtn = document.getElementById('add-food-vendor');
-        const addOtherFeeBtn = document.getElementById('add-other-fee');
-        const recentTitlesContainer = document.getElementById('recent-titles');
-        const otherTitleInput = document.getElementById('entry-other-title');
-        const successModal = new bootstrap.Modal(document.getElementById('successModal'));
-        const historyContainer = document.getElementById('history-container');
+        const roleSelection = document.getElementById('role-selection');
+        const teacherBtn = document.getElementById('teacher-btn');
+        const adminBtn = document.getElementById('admin-btn');
+        const teacherPasswordScreen = document.getElementById('teacher-password-screen');
+        const teacherPasswordInput = document.getElementById('teacher-password');
+        const teacherLoginBtn = document.getElementById('teacher-login-btn');
+        const teacherSignupScreen = document.getElementById('teacher-signup-screen');
+        const teacherNameInput = document.getElementById('teacher-name');
+        const teacherClassSelect = document.getElementById('teacher-class');
+        const teacherSignupBtn = document.getElementById('teacher-signup-btn');
+        const teacherDashboard = document.getElementById('teacher-dashboard');
+        const dashboardTitle = document.getElementById('dashboard-title');
+        const logoutBtn = document.getElementById('logout-btn');
+        const classFeeAmountInput = document.getElementById('class-fee-amount');
+        const addClassFeeBtn = document.getElementById('add-class-fee-btn');
+        const printingFeeAmountInput = document.getElementById('printing-fee-amount');
+        const addPrintingFeeBtn = document.getElementById('add-printing-fee-btn');
+        const withdrawalAmountInput = document.getElementById('withdrawal-amount');
+        const withdrawalReasonInput = document.getElementById('withdrawal-reason');
+        const makeWithdrawalBtn = document.getElementById('make-withdrawal-btn');
+        const classFeesHistoryContainer = document.getElementById('class-fees-history');
+        const printingFeesHistoryContainer = document.getElementById('printing-fees-history');
+        const withdrawalHistoryContainer = document.getElementById('withdrawal-history');
 
-        // Recent titles from localStorage
-        let recentTitles = JSON.parse(localStorage.getItem('recentTitles')) || [];
-        // Local history of added fees
-        let localHistory = JSON.parse(localStorage.getItem('localHistory')) || [];
-
-        // Function to show success message
-        function showSuccessMessage() {
-            successModal.show();
-            setTimeout(() => {
-                successModal.hide();
-            }, 3000);
-        }
-
-        // Function to update recent titles display
-        function updateRecentTitlesDisplay() {
-            recentTitlesContainer.innerHTML = '';
-            
-            if (recentTitles.length > 0) {
-                const titleElement = document.createElement('div');
-                titleElement.className = 'mb-2';
-                titleElement.textContent = 'Recent Titles:';
-                recentTitlesContainer.appendChild(titleElement);
-                
-                recentTitles.forEach((title, index) => {
-                    const titleTag = document.createElement('span');
-                    titleTag.className = 'recent-title';
-                    titleTag.textContent = title;
-                    
-                    // Add click handler to populate the title field
-                    titleTag.addEventListener('click', () => {
-                        otherTitleInput.value = title;
-                        otherTitleInput.focus();
-                    });
-                    
-                    recentTitlesContainer.appendChild(titleTag);
-                });
-            }
-        }
-
-        // Function to update history display
-        function updateHistoryDisplay() {
-            historyContainer.innerHTML = '';
-            
-            if (localHistory.length === 0) {
-                historyContainer.innerHTML = '<div class="text-muted">No entries yet</div>';
-                return;
-            }
-            
-            // Show only the last 20 entries (most recent first)
-            const recentEntries = [...localHistory].reverse().slice(0, 20);
-            
-            recentEntries.forEach(entry => {
-                const historyItem = document.createElement('div');
-                historyItem.className = 'history-item';
-                
-                historyItem.innerHTML = `
-                    <div>
-                        <div class="history-date">${formatDate(entry.date)}</div>
-                        <div>${getEntryDescription(entry)}</div>
-                    </div>
-                    <div class="history-amount ${entry.type === 'withdrawal' ? 'negative-amount' : 'positive-amount'}">
-                        ${entry.type === 'withdrawal' ? '-' : '+'}${formatCurrency(entry.amount)}
-                    </div>
-                `;
-                
-                historyContainer.appendChild(historyItem);
-            });
-        }
+        // Teacher state
+        let currentTeacher = null;
+        let currentClass = null;
 
         // Function to format date
         function formatDate(timestamp) {
-            const date = new Date(timestamp);
-            return date.toLocaleString();
+            try {
+                const date = new Date(timestamp);
+                if (isNaN(date.getTime())) {
+                    return "Invalid Date";
+                }
+                const options = { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+                return date.toLocaleDateString('en-US', options);
+            } catch (e) {
+                logDebug("Error formatting date:", e);
+                return "Date Error";
+            }
         }
 
         // Function to format currency
@@ -394,73 +324,232 @@
             return new Intl.NumberFormat('en-GH', { style: 'currency', currency: 'GHS' }).format(amount);
         }
 
-        // Function to get description for history entry
-        function getEntryDescription(entry) {
-            switch (entry.type) {
-                case 'classFee':
-                    return `Class Fee (${entry.className})`;
-                case 'offering':
-                    return 'Church Offering';
-                case 'foodVendor':
-                    return `Food Vendor (${entry.vendorName})`;
-                case 'otherFee':
-                    return `Other Fee: ${entry.title}${entry.className ? ` (${entry.className})` : ''}`;
-                default:
-                    return 'Financial Entry';
-            }
+        // Function to show screen and hide others
+        function showScreen(screenToShow) {
+            const screens = [
+                roleSelection,
+                teacherPasswordScreen,
+                teacherSignupScreen,
+                teacherDashboard
+            ];
+            
+            screens.forEach(screen => {
+                if (screen === screenToShow) {
+                    screen.classList.remove('hidden');
+                } else {
+                    screen.classList.add('hidden');
+                }
+            });
         }
 
-        // Function to add a title to recent titles
-        function addRecentTitle(title) {
-            // Remove if already exists to avoid duplicates
-            recentTitles = recentTitles.filter(t => t !== title);
+        // Function to load class fees for the current class
+        function loadClassFees() {
+            logDebug("Loading class fees for class:", currentClass);
+            classFeesHistoryContainer.innerHTML = '';
             
-            // Add to beginning of array
-            recentTitles.unshift(title);
-            
-            // Keep only the last 10 titles
-            if (recentTitles.length > 10) {
-                recentTitles = recentTitles.slice(0, 10);
-            }
-            
-            // Save to localStorage
-            localStorage.setItem('recentTitles', JSON.stringify(recentTitles));
-            
-            // Update display
-            updateRecentTitlesDisplay();
+            database.ref('classFees')
+                .orderByChild('className')
+                .equalTo(currentClass)
+                .once('value', (snapshot) => {
+                    logDebug("Class fees snapshot received", snapshot.val());
+                    
+                    snapshot.forEach((childSnapshot) => {
+                        const fee = childSnapshot.val();
+                        fee.id = childSnapshot.key;
+                        
+                        const historyItem = document.createElement('div');
+                        historyItem.className = 'history-item class-fee-item';
+                        
+                        historyItem.innerHTML = `
+                            <div>
+                                <div class="history-date">${formatDate(fee.date)}</div>
+                                <div>Class Fee</div>
+                            </div>
+                            <div class="history-amount positive-amount">+${formatCurrency(fee.amount || 0)}</div>
+                        `;
+                        
+                        classFeesHistoryContainer.prepend(historyItem);
+                    });
+                }, (error) => {
+                    logDebug("Error loading class fees:", error);
+                    alert("Error loading class fees. Check console for details.");
+                });
         }
 
-        // Function to add entry to local history
-        function addToHistory(entry) {
-            localHistory.push(entry);
+        // Function to load printing fees for the current class
+        function loadPrintingFees() {
+            logDebug("Loading printing fees for class:", currentClass);
+            printingFeesHistoryContainer.innerHTML = '';
             
-            // Keep history to a reasonable size
-            if (localHistory.length > 100) {
-                localHistory = localHistory.slice(-100);
-            }
-            
-            // Save to localStorage
-            localStorage.setItem('localHistory', JSON.stringify(localHistory));
-            
-            // Update display
-            updateHistoryDisplay();
+            database.ref('printingFees')
+                .orderByChild('className')
+                .equalTo(currentClass)
+                .once('value', (snapshot) => {
+                    logDebug("Printing fees snapshot received", snapshot.val());
+                    
+                    snapshot.forEach((childSnapshot) => {
+                        const fee = childSnapshot.val();
+                        fee.id = childSnapshot.key;
+                        
+                        const historyItem = document.createElement('div');
+                        historyItem.className = 'history-item printing-fee-item';
+                        
+                        historyItem.innerHTML = `
+                            <div>
+                                <div class="history-date">${formatDate(fee.date)}</div>
+                                <div>Printing Fee</div>
+                            </div>
+                            <div class="history-amount positive-amount">+${formatCurrency(fee.amount || 0)}</div>
+                        `;
+                        
+                        printingFeesHistoryContainer.prepend(historyItem);
+                    });
+                }, (error) => {
+                    logDebug("Error loading printing fees:", error);
+                    alert("Error loading printing fees. Check console for details.");
+                });
         }
 
-        // Add Class Fee
-        addClassFeeBtn.addEventListener('click', () => {
-            const classSelect = document.getElementById('entry-class-select');
-            const feeAmount = document.getElementById('entry-fee-amount');
+        // Function to load withdrawals made from this class
+        function loadWithdrawals() {
+            logDebug("Loading withdrawals for class:", currentClass);
+            withdrawalHistoryContainer.innerHTML = '';
             
-            if (!feeAmount.value || isNaN(feeAmount.value) || parseFloat(feeAmount.value) <= 0) {
-                alert('Please enter a valid amount');
+            database.ref('Expenses')
+                .orderByChild('source')
+                .equalTo(`Class Fees (${currentClass})`)
+                .once('value', (snapshot) => {
+                    logDebug("Withdrawals snapshot received", snapshot.val());
+                    
+                    snapshot.forEach((childSnapshot) => {
+                        const withdrawal = childSnapshot.val();
+                        withdrawal.id = childSnapshot.key;
+                        
+                        const historyItem = document.createElement('div');
+                        historyItem.className = 'history-item';
+                        
+                        historyItem.innerHTML = `
+                            <div>
+                                <div class="history-date">${formatDate(withdrawal.date)}</div>
+                                <div>${withdrawal.reason || 'No reason provided'}</div>
+                            </div>
+                            <div class="history-amount negative-amount">-${formatCurrency(withdrawal.amount || 0)}</div>
+                        `;
+                        
+                        withdrawalHistoryContainer.prepend(historyItem);
+                    });
+                }, (error) => {
+                    logDebug("Error loading withdrawals:", error);
+                    alert("Error loading withdrawals. Check console for details.");
+                });
+        }
+
+        // Teacher role selected
+        teacherBtn.addEventListener('click', () => {
+            showScreen(teacherPasswordScreen);
+        });
+
+        // Admin role selected (just show message for now)
+        adminBtn.addEventListener('click', () => {
+            alert("Admin portal is not implemented in this version. Please use the main financial tracker for admin functions.");
+        });
+
+        // Teacher login
+        teacherLoginBtn.addEventListener('click', () => {
+            const password = teacherPasswordInput.value;
+            
+            if (password !== "Teacher@123") {
+                alert("Incorrect password. Please try again.");
                 return;
             }
             
-            const amount = parseFloat(feeAmount.value);
+            // Check if teacher is already registered
+            const teacherId = localStorage.getItem('teacherId');
+            if (teacherId) {
+                // Load teacher data
+                database.ref(`teachers/${teacherId}`).once('value', (snapshot) => {
+                    const teacherData = snapshot.val();
+                    if (teacherData) {
+                        currentTeacher = teacherData.name;
+                        currentClass = teacherData.class;
+                        dashboardTitle.textContent = `${currentTeacher}'s Dashboard (${currentClass})`;
+                        showScreen(teacherDashboard);
+                        
+                        // Load data
+                        loadClassFees();
+                        loadPrintingFees();
+                        loadWithdrawals();
+                    } else {
+                        // Teacher record not found, show signup
+                        showScreen(teacherSignupScreen);
+                    }
+                });
+            } else {
+                // No teacher ID found, show signup
+                showScreen(teacherSignupScreen);
+            }
+        });
+
+        // Teacher signup
+        teacherSignupBtn.addEventListener('click', () => {
+            const name = teacherNameInput.value.trim();
+            const className = teacherClassSelect.value;
+            
+            if (!name) {
+                alert("Please enter your name");
+                return;
+            }
+            
+            // Create teacher record
+            const newTeacher = {
+                name: name,
+                class: className,
+                registeredAt: Date.now()
+            };
+            
+            logDebug("Registering new teacher:", newTeacher);
+            
+            const newTeacherRef = database.ref('teachers').push(newTeacher);
+            newTeacherRef.then(() => {
+                logDebug("Teacher registered successfully");
+                
+                // Save teacher ID to localStorage
+                localStorage.setItem('teacherId', newTeacherRef.key);
+                
+                // Set current teacher and class
+                currentTeacher = name;
+                currentClass = className;
+                dashboardTitle.textContent = `${currentTeacher}'s Dashboard (${currentClass})`;
+                
+                // Show dashboard
+                showScreen(teacherDashboard);
+                
+                // Load data
+                loadClassFees();
+                loadPrintingFees();
+                loadWithdrawals();
+                
+                alert("Registration successful!");
+            }).catch((error) => {
+                logDebug('Error registering teacher:', error);
+                alert('Error registering. Please check console for details.');
+            });
+        });
+
+        // Add class fee
+        addClassFeeBtn.addEventListener('click', () => {
+            const amount = parseFloat(classFeeAmountInput.value);
+            
+            if (isNaN(amount) || amount <= 0) {
+                alert("Please enter a valid amount");
+                return;
+            }
+            
             const newFee = {
-                className: classSelect.value,
+                className: currentClass,
                 amount: amount,
                 date: Date.now(),
+                addedBy: currentTeacher,
                 deleted: false
             };
             
@@ -469,17 +558,9 @@
             database.ref('classFees').push(newFee)
                 .then(() => {
                     logDebug("Class fee added successfully");
-                    
-                    // Add to local history
-                    addToHistory({
-                        type: 'classFee',
-                        className: classSelect.value,
-                        amount: amount,
-                        date: Date.now()
-                    });
-                    
-                    feeAmount.value = '';
-                    showSuccessMessage();
+                    classFeeAmountInput.value = '';
+                    loadClassFees();
+                    alert('Class fee added successfully!');
                 })
                 .catch((error) => {
                     logDebug('Error adding class fee:', error);
@@ -487,160 +568,147 @@
                 });
         });
 
-        // Add Church Offering
-        addOfferingBtn.addEventListener('click', () => {
-            const offeringAmount = document.getElementById('entry-offering-amount');
+        // Add printing fee
+        addPrintingFeeBtn.addEventListener('click', () => {
+            const amount = parseFloat(printingFeeAmountInput.value);
             
-            if (!offeringAmount.value || isNaN(offeringAmount.value) || parseFloat(offeringAmount.value) <= 0) {
-                alert('Please enter a valid amount');
+            if (isNaN(amount) || amount <= 0) {
+                alert("Please enter a valid amount");
                 return;
             }
             
-            const amount = parseFloat(offeringAmount.value);
-            const newOffering = {
+            const newFee = {
+                className: currentClass,
                 amount: amount,
                 date: Date.now(),
+                addedBy: currentTeacher,
                 deleted: false
             };
             
-            logDebug("Adding new offering:", newOffering);
+            logDebug("Adding new printing fee:", newFee);
             
-            database.ref('offerings').push(newOffering)
+            database.ref('printingFees').push(newFee)
                 .then(() => {
-                    logDebug("Offering added successfully");
-                    
-                    // Add to local history
-                    addToHistory({
-                        type: 'offering',
-                        amount: amount,
-                        date: Date.now()
-                    });
-                    
-                    offeringAmount.value = '';
-                    showSuccessMessage();
+                    logDebug("Printing fee added successfully");
+                    printingFeeAmountInput.value = '';
+                    loadPrintingFees();
+                    alert('Printing fee added successfully!');
                 })
                 .catch((error) => {
-                    logDebug('Error adding offering:', error);
-                    alert('Error adding offering. Please check console for details.');
+                    logDebug('Error adding printing fee:', error);
+                    alert('Error adding printing fee. Please check console for details.');
                 });
         });
 
-        // Add Food Vendor Due
-        addFoodVendorBtn.addEventListener('click', () => {
-            const vendorName = document.getElementById('entry-vendor-name');
-            const foodAmount = document.getElementById('entry-food-amount');
+        // Make withdrawal
+        makeWithdrawalBtn.addEventListener('click', () => {
+            const amount = parseFloat(withdrawalAmountInput.value);
+            const reason = withdrawalReasonInput.value.trim();
             
-            if (!vendorName.value.trim()) {
-                alert('Please enter vendor name');
+            if (isNaN(amount) || amount <= 0) {
+                alert("Please enter a valid amount");
                 return;
             }
             
-            if (!foodAmount.value || isNaN(foodAmount.value) || parseFloat(foodAmount.value) <= 0) {
-                alert('Please enter a valid amount');
+            if (!reason) {
+                alert("Please enter a reason for withdrawal");
                 return;
             }
             
-            const amount = parseFloat(foodAmount.value);
-            const vendor = vendorName.value.trim();
-            const newFood = {
-                vendorName: vendor,
-                amount: amount,
-                date: Date.now(),
-                deleted: false
-            };
-            
-            logDebug("Adding new food vendor due:", newFood);
-            
-            database.ref('foodVendors').push(newFood)
-                .then(() => {
-                    logDebug("Food vendor due added successfully");
-                    
-                    // Add to local history
-                    addToHistory({
-                        type: 'foodVendor',
-                        vendorName: vendor,
-                        amount: amount,
-                        date: Date.now()
+            // First get current class fees total to check balance
+            database.ref('classFees')
+                .orderByChild('className')
+                .equalTo(currentClass)
+                .once('value', (snapshot) => {
+                    let classTotal = 0;
+                    snapshot.forEach((childSnapshot) => {
+                        const fee = childSnapshot.val();
+                        if (!fee.deleted) {
+                            classTotal += parseFloat(fee.amount) || 0;
+                        }
                     });
                     
-                    vendorName.value = '';
-                    foodAmount.value = '';
-                    showSuccessMessage();
-                })
-                .catch((error) => {
-                    logDebug('Error adding food vendor due:', error);
-                    alert('Error adding food vendor due. Please check console for details.');
+                    // Get total withdrawals from this class
+                    database.ref('Expenses')
+                        .orderByChild('source')
+                        .equalTo(`Class Fees (${currentClass})`)
+                        .once('value', (withdrawalSnapshot) => {
+                            let totalWithdrawn = 0;
+                            withdrawalSnapshot.forEach((childSnapshot) => {
+                                const withdrawal = childSnapshot.val();
+                                if (!withdrawal.deleted) {
+                                    totalWithdrawn += parseFloat(withdrawal.amount) || 0;
+                                }
+                            });
+                            
+                            const availableBalance = classTotal - totalWithdrawn;
+                            
+                            if (amount > availableBalance) {
+                                alert(`Withdrawal amount cannot exceed available balance of ${formatCurrency(availableBalance)}`);
+                                return;
+                            }
+                            
+                            // Create withdrawal record
+                            const newWithdrawal = {
+                                source: `Class Fees (${currentClass})`,
+                                amount: amount,
+                                reason: reason,
+                                previousBalance: availableBalance,
+                                newBalance: availableBalance - amount,
+                                date: Date.now(),
+                                requestedBy: currentTeacher,
+                                deleted: false
+                            };
+                            
+                            logDebug("Making new withdrawal:", newWithdrawal);
+                            
+                            database.ref('Expenses').push(newWithdrawal)
+                                .then(() => {
+                                    logDebug("Withdrawal added successfully");
+                                    withdrawalAmountInput.value = '';
+                                    withdrawalReasonInput.value = '';
+                                    loadWithdrawals();
+                                    alert('Withdrawal request submitted successfully!');
+                                })
+                                .catch((error) => {
+                                    logDebug('Error making withdrawal:', error);
+                                    alert('Error making withdrawal. Please check console for details.');
+                                });
+                        });
                 });
         });
 
-        // Add Other Fee
-        addOtherFeeBtn.addEventListener('click', () => {
-            const otherTitle = document.getElementById('entry-other-title');
-            const otherAmount = document.getElementById('entry-other-amount');
-            const otherClassSelect = document.getElementById('entry-other-class-select');
-            
-            if (!otherTitle.value.trim()) {
-                alert('Please enter fee title');
-                return;
-            }
-            
-            if (!otherAmount.value || isNaN(otherAmount.value) || parseFloat(otherAmount.value) <= 0) {
-                alert('Please enter a valid amount');
-                return;
-            }
-            
-            const title = otherTitle.value.trim();
-            const amount = parseFloat(otherAmount.value);
-            const className = otherClassSelect.value;
-            
-            const newOther = {
-                title: title,
-                amount: amount,
-                date: Date.now(),
-                deleted: false
-            };
-            
-            // Add class if selected
-            if (className) {
-                newOther.className = className;
-            }
-            
-            logDebug("Adding new other fee:", newOther);
-            
-            database.ref('otherFees').push(newOther)
-                .then(() => {
-                    logDebug("Other fee added successfully");
-                    
-                    // Add title to recent titles
-                    addRecentTitle(title);
-                    
-                    // Add to local history
-                    addToHistory({
-                        type: 'otherFee',
-                        title: title,
-                        className: className,
-                        amount: amount,
-                        date: Date.now()
-                    });
-                    
-                    otherTitle.value = '';
-                    otherAmount.value = '';
-                    otherClassSelect.value = '';
-                    showSuccessMessage();
-                })
-                .catch((error) => {
-                    logDebug('Error adding other fee:', error);
-                    alert('Error adding other fee. Please check console for details.');
-                });
+        // Logout
+        logoutBtn.addEventListener('click', () => {
+            currentTeacher = null;
+            currentClass = null;
+            showScreen(roleSelection);
         });
 
-        // Initialize the application
+        // Initialize the app
         function initApp() {
-            logDebug("Initializing data entry application...");
-            updateRecentTitlesDisplay();
-            updateHistoryDisplay();
+            logDebug("Initializing teacher portal...");
+            showScreen(roleSelection);
             
-            logDebug("Data entry application initialized successfully");
+            // Check if teacher is already logged in
+            const teacherId = localStorage.getItem('teacherId');
+            if (teacherId) {
+                // Try to load teacher data
+                database.ref(`teachers/${teacherId}`).once('value', (snapshot) => {
+                    const teacherData = snapshot.val();
+                    if (teacherData) {
+                        currentTeacher = teacherData.name;
+                        currentClass = teacherData.class;
+                        dashboardTitle.textContent = `${currentTeacher}'s Dashboard (${currentClass})`;
+                        showScreen(teacherDashboard);
+                        
+                        // Load data
+                        loadClassFees();
+                        loadPrintingFees();
+                        loadWithdrawals();
+                    }
+                });
+            }
         }
 
         // Start the app when DOM is loaded
